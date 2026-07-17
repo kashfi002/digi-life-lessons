@@ -1,8 +1,22 @@
 "use client";
+
+/**
+ * Navbar — Digital Life Lessons
+ * -----------------------------------------------------------------------
+ * CHANGE: the signed-in state was a Dropdown before — avatar tucked
+ * inside a menu you had to click to reveal "Log out". Simplified to a
+ * plain inline row: avatar circle (photo, or first letter of the name
+ * if there's no photo) sitting directly beside a "Log out" button.
+ * No menu, nothing hidden.
+ *
+ * "Log in" is a plain <Link> (not a HeroUI Button) — HeroUI's Button
+ * wrapper was swallowing the click before Next could navigate.
+ */
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@heroui/react";
+import { useRouter, usePathname } from "next/navigation";
+import { useSession, signOut } from "@/lib/auth-client";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -22,33 +36,105 @@ function HighlightMark({ active }) {
           ? "scale-x-100 bg-[#F2C14E]"
           : "scale-x-0 bg-[#F2C14E]/40 group-hover:scale-x-100",
       ].join(" ")}
-      style={{ transform: `${active ? "" : ""} rotate(0 deg)` }}
+      style={{ transform: "rotate(-1.2deg)" }}
     />
   );
 }
 
 function LogoMark() {
   return (
-    <svg
-      width="34"
-      height="34"
-      viewBox="0 0 34 34"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" className="shrink-0">
       <rect width="34" height="34" rx="9" fill="#1B1E29" />
       <rect width="34" height="34" rx="9" stroke="#2A2E3B" strokeWidth="1" />
-      {/* folded corner — a "page" */}
-      <path d="M22 6H8a2 2 0 0 0-2 2v18l6-4 5 3 5-3 5 3V8a2 2 0 0 0-2-2Z" fill="none" stroke="#9BA0AF" strokeWidth="1.4" strokeLinejoin="round" />
-      {/* the highlighter stroke through the page, echoing the nav signature */}
+      <path
+        d="M22 6H8a2 2 0 0 0-2 2v18l6-4 5 3 5-3 5 3V8a2 2 0 0 0-2-2Z"
+        fill="none"
+        stroke="#9BA0AF"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
       <rect x="7" y="15.2" width="16" height="3.4" rx="1.7" fill="#F2C14E" transform="rotate(-3 15 17)" />
     </svg>
   );
 }
 
+// First letter of the name — falls back to the email's first letter if no name is set.
+function firstLetterOf(name, email) {
+  const source = name?.trim() || email?.trim() || "?";
+  return source.charAt(0).toUpperCase();
+}
+
+function Avatar({ user, size = 34 }) {
+  const style = { width: size, height: size };
+  if (user?.image) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={user.image}
+        alt={user.name || "Account"}
+        style={style}
+        className="shrink-0 rounded-full object-cover ring-1 ring-white/10"
+      />
+    );
+  }
+  return (
+    <div
+      style={style}
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#F2C14E]/15 text-[14px] font-semibold text-[#F2C14E] ring-1 ring-white/10"
+    >
+      {firstLetterOf(user?.name, user?.email)}
+    </div>
+  );
+}
+
+// Plain <Link> styled as the gold pill — no HeroUI Button wrapper involved.
+function LoginPill({ className = "" }) {
+  return (
+    <Link
+      href="/login"
+      className={[
+        "inline-flex items-center justify-center rounded-full bg-[#F2C14E] px-6 py-2 text-[14.5px] font-semibold text-[#12141C] transition-colors hover:bg-[#F6CD6C]",
+        className,
+      ].join(" ")}
+    >
+      Log in
+    </Link>
+  );
+}
+
+function AuthArea({ session, isPending, onSignOut }) {
+  if (isPending) {
+    return <div className="h-9 w-[92px] animate-pulse rounded-full bg-white/[0.06]" />;
+  }
+
+  if (!session?.user) {
+    return <LoginPill />;
+  }
+
+  const { user } = session;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
+        <Avatar user={user} />
+        <span className="hidden max-w-[110px] truncate text-[14px] font-medium text-[#ECEAE3] lg:inline">
+          {user.name || user.email}
+        </span>
+      </div>
+      <button
+        onClick={onSignOut}
+        className="rounded-full border border-white/10 px-4 py-1.5 text-[13px] font-medium text-[#9BA0AF] transition-colors hover:border-[#F2C14E]/40 hover:text-[#F2C14E]"
+      >
+        Log out
+      </button>
+    </div>
+  );
+}
+
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -62,6 +148,12 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header
@@ -93,9 +185,7 @@ export default function Navbar() {
         <ul className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
             const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
+              link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
             return (
               <li key={link.href} className="relative">
                 <Link
@@ -103,9 +193,7 @@ export default function Navbar() {
                   aria-current={isActive ? "page" : undefined}
                   className={[
                     "group relative inline-block rounded-lg px-4 py-2 text-[15px] font-medium transition-colors duration-200",
-                    isActive
-                      ? "text-[#ECEAE3]"
-                      : "text-[#9BA0AF] hover:text-[#ECEAE3]",
+                    isActive ? "text-[#ECEAE3]" : "text-[#9BA0AF] hover:text-[#ECEAE3]",
                   ].join(" ")}
                 >
                   {link.label}
@@ -116,14 +204,9 @@ export default function Navbar() {
           })}
         </ul>
 
-        {/* Login CTA (desktop) */}
+        {/* Auth area (desktop) */}
         <div className="hidden md:block">
-          <Button
-            radius="full"
-            className="bg-[#F2C14E] px-6 font-semibold text-[#12141C] hover:bg-[#F6CD6C] transition-colors"
-          >
-            Log in
-          </Button>
+          <AuthArea session={session} isPending={isPending} onSignOut={handleSignOut} />
         </div>
 
         {/* Mobile hamburger */}
@@ -168,9 +251,7 @@ export default function Navbar() {
           <ul className="flex flex-col gap-1 border-t border-white/[0.06] px-5 py-4">
             {NAV_LINKS.map((link) => {
               const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
+                link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
               return (
                 <li key={link.href}>
                   <Link
@@ -178,9 +259,7 @@ export default function Navbar() {
                     aria-current={isActive ? "page" : undefined}
                     className={[
                       "relative flex items-center rounded-lg px-3 py-2.5 text-[15px] font-medium",
-                      isActive
-                        ? "bg-white/[0.04] text-[#ECEAE3]"
-                        : "text-[#9BA0AF]",
+                      isActive ? "bg-white/[0.04] text-[#ECEAE3]" : "text-[#9BA0AF]",
                     ].join(" ")}
                   >
                     <span className="relative inline-block">
@@ -191,13 +270,28 @@ export default function Navbar() {
                 </li>
               );
             })}
-            <li className="pt-2">
-              <Button
-                radius="full"
-                className="w-full bg-[#F2C14E] font-semibold text-[#12141C]"
-              >
-                Log in
-              </Button>
+
+            <li className="pt-3">
+              {isPending ? (
+                <div className="h-10 w-full animate-pulse rounded-full bg-white/[0.06]" />
+              ) : session?.user ? (
+                <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar user={session.user} size={30} />
+                    <span className="max-w-[140px] truncate text-[14px] text-[#ECEAE3]">
+                      {session.user.name || session.user.email}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-[13px] font-medium text-[#F2C14E]"
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <LoginPill className="w-full" />
+              )}
             </li>
           </ul>
         </div>
@@ -215,6 +309,6 @@ export default function Navbar() {
  *
  *   <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
  *
- * If you'd rather skip next/font, the component already falls back to
- * Georgia for the wordmark, so nothing breaks without it.
+ * Adjust the "@/lib/auth-client" import path if your jsconfig alias
+ * differs — your screenshot shows src/lib/auth-client.js, which matches.
  */
