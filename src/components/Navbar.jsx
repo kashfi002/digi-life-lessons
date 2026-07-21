@@ -169,7 +169,7 @@ function AccountMenu({ user, onSignOut }) {
               Profile
             </Link>
             <Link
-              href="/dashboard"
+              href="/dashboard/user"
               onClick={() => setOpen(false)}
               className="rounded-lg px-3 py-2 text-[14px] text-[#ECEAE3] transition-colors hover:bg-white/[0.06]"
             >
@@ -374,7 +374,7 @@ export default function Navbar() {
                   <Link href="/dashboard/profile" className="rounded-lg px-2 py-2 text-[14px] text-[#9BA0AF]">
                     Profile
                   </Link>
-                  <Link href="/dashboard" className="rounded-lg px-2 py-2 text-[14px] text-[#9BA0AF]">
+                  <Link href="/dashboard/user" className="rounded-lg px-2 py-2 text-[14px] text-[#9BA0AF]">
                     Dashboard
                   </Link>
                   <button

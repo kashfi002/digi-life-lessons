@@ -1,4 +1,29 @@
 "use client";
+
+/**
+ * Add Lesson — /dashboard/add-lesson
+ * -----------------------------------------------------------------------
+ * Frontend-only for now, per your call — this POSTs to /api/lessons,
+ * which doesn't exist yet. Everything else (validation, the Premium
+ * gate, loading state, toasts) is fully working already.
+ *
+ * Expected payload shape (creatorId/createdAt are added server-side,
+ * not sent from here):
+ *   {
+ *     title: string,
+ *     description: string,
+ *     category: "Personal Growth" | "Career" | "Relationships" | "Mindset" | "Mistakes Learned",
+ *     emotionalTone: "Motivational" | "Sad" | "Realization" | "Gratitude",
+ *     image: string | null,
+ *     visibility: "Public" | "Private",
+ *     accessLevel: "Free" | "Premium",
+ *   }
+ *
+ * Access Level rule (from the PDF): only Premium users can pick
+ * "Premium" — the option is disabled with a tooltip for everyone else,
+ * and the value is force-reset to "Free" if it somehow isn't.
+ */
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
@@ -35,9 +60,15 @@ export default function AddLessonPage() {
     e.preventDefault();
     if (!validate()) return;
 
+    if (!session?.user) {
+      pushToast("error", "You need to be logged in to publish a lesson.");
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await fetch("/api/lessons", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lessons`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,6 +81,15 @@ export default function AddLessonPage() {
           // defensive: never send "Premium" for a non-premium user, even
           // if client state somehow got out of sync with the disabled UI
           accessLevel: isPremium ? accessLevel : "Free",
+
+          // who's posting it — read from the current session.
+          // TEMPORARY: the backend currently trusts these fields as-is.
+          // Once token verification (Challenge 2) is in place, the
+          // backend should confirm this independently instead.
+          creatorId: session.user.id,
+          creatorName: session.user.name,
+          creatorEmail: session.user.email,
+          creatorImage: session.user.image || null,
         }),
       });
 
