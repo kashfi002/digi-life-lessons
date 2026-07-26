@@ -43,18 +43,11 @@ export default function PricingPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/create-checkout-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: session.user.id,
-          email: session.user.email,
-        }),
-      });
-      if (!res.ok) throw new Error("Couldn't start checkout. Try again.");
-      const { url } = await res.json();
-      if (!url) throw new Error("Checkout session didn't return a redirect URL.");
-      window.location.href = url;
+      const res = await fetch("/api/checkout_sessions", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Couldn't start checkout. Try again.");
+      if (!data.url) throw new Error("Checkout session didn't return a redirect URL.");
+      window.location.href = data.url;
     } catch (err) {
       setError(err.message || "Something went wrong.");
       setLoading(false);
