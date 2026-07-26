@@ -33,7 +33,7 @@ export default function PaymentCancelPage() {
           Back to Pricing
         </Link>
         <Link
-          href="/dashboard"
+          href="/dashboard/user"
           className="rounded-full border border-white/10 px-6 py-2.5 text-[14px] font-medium text-[#ECEAE3] transition-colors hover:bg-white/[0.06]"
         >
           Go to Dashboard

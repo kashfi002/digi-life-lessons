@@ -67,6 +67,7 @@ function firstLetterOf(name, email) {
 
 function Avatar({ user, size = 32 }) {
   const style = { width: size, height: size };
+  const premiumRing = user?.isPremium ? "ring-2 ring-[#F2C14E]" : "ring-1 ring-white/10";
   if (user?.image) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -74,14 +75,14 @@ function Avatar({ user, size = 32 }) {
         src={user.image}
         alt={user.name || "Account"}
         style={style}
-        className="shrink-0 rounded-full object-cover ring-1 ring-white/10"
+        className={`shrink-0 rounded-full object-cover ${premiumRing}`}
       />
     );
   }
   return (
     <div
       style={style}
-      className="flex shrink-0 items-center justify-center rounded-full bg-[#F2C14E]/15 text-[13px] font-semibold text-[#F2C14E] ring-1 ring-white/10"
+      className={`flex shrink-0 items-center justify-center rounded-full bg-[#F2C14E]/15 text-[13px] font-semibold text-[#F2C14E] ${premiumRing}`}
     >
       {firstLetterOf(user?.name, user?.email)}
     </div>
@@ -155,9 +156,16 @@ function AccountMenu({ user, onSignOut }) {
           className="absolute right-0 top-[calc(100%+8px)] w-56 overflow-hidden rounded-xl border border-white/10 bg-[#1B1E29] shadow-2xl"
         >
           <div className="border-b border-white/[0.06] px-4 py-3">
-            <p className="truncate text-[13.5px] font-medium text-[#ECEAE3]">
-              {user.name || "Your account"}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="truncate text-[13.5px] font-medium text-[#ECEAE3]">
+                {user.name || "Your account"}
+              </p>
+              {user.isPremium && (
+                <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+                  PREMIUM ⭐
+                </span>
+              )}
+            </div>
             <p className="truncate text-[12.5px] text-[#9BA0AF]">{user.email}</p>
           </div>
           <div className="flex flex-col p-1.5">
@@ -367,9 +375,14 @@ export default function Navbar() {
                 <div className="flex flex-col gap-1 rounded-xl bg-white/[0.04] p-3">
                   <div className="mb-1.5 flex items-center gap-2.5">
                     <Avatar user={session.user} size={30} />
-                    <span className="max-w-[160px] truncate text-[14px] text-[#ECEAE3]">
+                    <span className="max-w-[140px] truncate text-[14px] text-[#ECEAE3]">
                       {session.user.name || session.user.email}
                     </span>
+                    {session.user.isPremium && (
+                      <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+                        ⭐
+                      </span>
+                    )}
                   </div>
                   <Link href="/dashboard/profile" className="rounded-lg px-2 py-2 text-[14px] text-[#9BA0AF]">
                     Profile
