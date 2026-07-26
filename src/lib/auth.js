@@ -28,9 +28,21 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: {
+      // FIX: needs `type` or better-auth won't register the field at
+      // all — that's why it was missing from every user document.
+      // FIX: `defaultValue`, not `default` — wrong key name.
+      // FIX: default changed "viewer" → "user" to match every role
+      // check elsewhere in the app (session.user.role === "admin").
       role: {
-        default: "viewer",
-      }
+        type: "string",
+        defaultValue: "user",
+        input: false, // client can never set this on signup/update
+      },
+      isPremium: {
+        type: "boolean",
+        defaultValue: false,
+        input: false, // only the Stripe webhook is allowed to flip this
+      },
     },
-  }
+  },
 });
