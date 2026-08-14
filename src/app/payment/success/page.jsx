@@ -63,7 +63,7 @@ export default function PaymentSuccessPage() {
 
       {!checking && (
         <Link
-          href="/dashboard/user"
+          href="/dashboard"
           className="mt-2 rounded-full bg-[#F2C14E] px-6 py-2.5 text-[14px] font-semibold text-[#12141C] transition-colors hover:bg-[#F6CD6C]"
         >
           Go to Dashboard

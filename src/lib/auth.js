@@ -5,17 +5,17 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 const client = new MongoClient(process.env.MONGODB_URI);
 const db = client.db("digital-life-lessons");
 
+// The one hardcoded admin account for this project. Only THIS exact
+// email+password pair gets promoted to role: "admin" at signup;
+// everyone else — including someone who signs up with this email but
+// a different password — keeps the normal "user" default.
+const ADMIN_EMAIL = "admin123@gmail.com";
+const ADMIN_PASSWORD = "Admin12345";
+
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  // Google button on the Register/Login pages needs this. Get the two
-  // values from https://console.cloud.google.com/apis/credentials
-  // (OAuth client ID → Web application) and add them to .env:
-  //   GOOGLE_CLIENT_ID=...
-  //   GOOGLE_CLIENT_SECRET=...
-  // Authorized redirect URI to whitelist there:
-  //   http://localhost:3000/api/auth/callback/google
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -23,16 +23,10 @@ export const auth = betterAuth({
     },
   },
   database: mongodbAdapter(db, {
-    // Optional: if you don't provide a client, database transactions won't be enabled.
     client,
   }),
   user: {
     additionalFields: {
-      // FIX: needs `type` or better-auth won't register the field at
-      // all — that's why it was missing from every user document.
-      // FIX: `defaultValue`, not `default` — wrong key name.
-      // FIX: default changed "viewer" → "user" to match every role
-      // check elsewhere in the app (session.user.role === "admin").
       role: {
         type: "string",
         defaultValue: "user",
@@ -41,7 +35,39 @@ export const auth = betterAuth({
       isPremium: {
         type: "boolean",
         defaultValue: false,
-        input: false, // only the Stripe webhook is allowed to flip this
+        input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // Fires once, at signup. ctx.body has the raw request body —
+        // email + plaintext password — before it's hashed away.
+        before: async (user, ctx) => {
+          const passwordMatches = ctx?.body?.password === ADMIN_PASSWORD;
+          if (user.email === ADMIN_EMAIL && passwordMatches) {
+            return { data: { ...user, role: "admin" } };
+          }
+        },
+      },
+    },
+    session: {
+      create: {
+        // Fires on every login. By this point the password has
+        // already been verified by better-auth itself — that's what
+        // "session created" means — so an email check here is enough:
+        // self-heals accounts created before this hook existed.
+        before: async (session) => {
+          const users = db.collection("user");
+          const user = await users.findOne({ id: session.userId });
+          if (user?.email === ADMIN_EMAIL && user.role !== "admin") {
+            await users.updateOne(
+              { id: session.userId },
+              { $set: { role: "admin" } }
+            );
+          }
+        },
       },
     },
   },

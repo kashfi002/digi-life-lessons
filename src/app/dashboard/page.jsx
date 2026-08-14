@@ -118,7 +118,7 @@ export default function DashboardHomePage() {
         {/* Weekly activity chart */}
         <div className="lg:col-span-2 rounded-2xl border border-white/[0.06] bg-[#1B1E29] p-5 sm:p-6">
           <h2 className="text-[15px] font-semibold text-[#ECEAE3]">This week's activity</h2>
-          <p className="mt-1 text-[13px] text-[#9BA0AF]">Lessons written per day</p>
+<p className="mt-1 text-[13px] text-[#9BA0AF]">Lessons written per day</p>
           <div className="mt-4 h-[180px]">
             {loadingSummary ? (
               <div className="h-full animate-pulse rounded-xl bg-white/[0.04]" />

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 
 const MAIN_LINKS = [
-  { label: "Dashboard", href: "/dashboard/user", icon: HomeIcon, exact: true },
+  { label: "Dashboard", href: "/dashboard", icon: HomeIcon, exact: true },
   { label: "Add Lesson", href: "/dashboard/add-lesson", icon: PlusIcon },
   { label: "My Lessons", href: "/dashboard/my-lessons", icon: StackIcon },
   { label: "My Favorites", href: "/dashboard/my-favorites", icon: BookmarkIcon },
