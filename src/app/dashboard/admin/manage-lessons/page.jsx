@@ -1,17 +1,5 @@
 "use client";
 
-/**
- * Manage Lessons — /dashboard/admin/manage-lessons
- * -----------------------------------------------------------------------
- * All lessons, all users. Featured and Reviewed are independent
- * booleans (not a segmented either/or like Visibility elsewhere), so
- * they're plain toggle pills, not MiniToggle's two-option pattern.
- *
- * Delete here is the admin override — it bypasses the "only the owner
- * can delete" check that the regular DELETE /api/lessons/:id route
- * enforces, via the separate DELETE /api/admin/lessons/:id route.
- */
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
