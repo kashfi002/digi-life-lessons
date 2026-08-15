@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Reported Lessons — /dashboard/admin/reported-lessons
- * -----------------------------------------------------------------------
- * One row per REPORTED LESSON (not per individual report) — the report
- * count and the "view reasons" modal are how individual reports surface.
- * Delete removes the lesson entirely; Ignore just clears its reports and
- * leaves the lesson live, per the PDF's exact wording for both actions.
- */
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
@@ -46,7 +37,7 @@ export default function ReportedLessonsPage() {
   useEffect(() => {
     if (sessionPending) return;
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [sessionPending, session?.user?.id]);
 
   const handleDeleteConfirm = async () => {
