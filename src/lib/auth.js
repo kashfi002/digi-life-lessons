@@ -48,7 +48,6 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        
         before: async (session) => {
           if (!ObjectId.isValid(session.userId)) return;
           const users = db.collection("user");
@@ -61,12 +60,17 @@ export const auth = betterAuth({
           }
         },
       },
-      cookieCache:{
-        enabled:true,
-        maxAge:7*24*60*60, // 7 days
-      strategy: "jwt",
-      }
     },
-    plugins:[jwt()]
   },
+  plugins: [
+    jwt({
+      jwt: {
+        definePayload: ({ user }) => ({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        }),
+      },
+    }),
+  ],
 });
