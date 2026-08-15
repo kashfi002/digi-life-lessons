@@ -194,26 +194,3 @@ function LinkedInIcon() {
     </svg>
   );
 }
-
-/**
- * Usage — app/page.jsx:
- *
- *   import Navbar from "@/components/Navbar";
- *   import HeroSlider from "@/components/HeroSlider";
- *   import WhyItMatters from "@/components/WhyItMatters";
- *   import Footer from "@/components/Footer";
- *
- *   export default function Home() {
- *     return (
- *       <>
- *         <Navbar />
- *         <HeroSlider />
- *         <WhyItMatters />
- *         <Footer />
- *       </>
- *     );
- *   }
- *
- * Swap the mailto/tel/social hrefs and terms/privacy routes for your
- * real ones — these are placeholders.
- */
