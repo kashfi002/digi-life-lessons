@@ -1,28 +1,17 @@
 import { betterAuth } from "better-auth";
 import { MongoClient, ObjectId } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { jwt } from "better-auth/plugins";
 
 const client = new MongoClient(process.env.MONGODB_URI);
 const db = client.db("digital-life-lessons");
-
-// The one hardcoded admin account for this project. Only THIS exact
-// email+password pair gets promoted to role: "admin" at signup;
-// everyone else — including someone who signs up with this email but
-// a different password — keeps the normal "user" default.
-const ADMIN_EMAIL = "admin123@gmail.com";
-const ADMIN_PASSWORD = "Admin12345";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  // Google button on the Register/Login pages needs this. Get the two
-  // values from https://console.cloud.google.com/apis/credentials
-  // (OAuth client ID → Web application) and add them to .env:
-  //   GOOGLE_CLIENT_ID=...
-  //   GOOGLE_CLIENT_SECRET=...
-  // Authorized redirect URI to whitelist there:
-  //   http://localhost:3000/api/auth/callback/google
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -30,7 +19,6 @@ export const auth = betterAuth({
     },
   },
   database: mongodbAdapter(db, {
-    // Optional: if you don't provide a client, database transactions won't be enabled.
     client,
   }),
   user: {
@@ -50,8 +38,6 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        // Fires once, at signup. ctx.body has the raw request body —
-        // email + plaintext password — before it's hashed away.
         before: async (user, ctx) => {
           const passwordMatches = ctx?.body?.password === ADMIN_PASSWORD;
           if (user.email === ADMIN_EMAIL && passwordMatches) {
@@ -62,16 +48,7 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        // Fires on every login. By this point the password has
-        // already been verified by better-auth itself, so an email
-        // check is enough here — this self-heals accounts created
-        // before this hook existed.
-        //
-        // NOTE: better-auth's mongo adapter stores the primary key as
-        // _id (ObjectId) on the raw document — there is no "id" field
-        // on the document itself, only in better-auth's own
-        // transformed output. Querying the raw collection means
-        // querying by _id, not by "id".
+        
         before: async (session) => {
           if (!ObjectId.isValid(session.userId)) return;
           const users = db.collection("user");
@@ -84,6 +61,12 @@ export const auth = betterAuth({
           }
         },
       },
+      cookieCache:{
+        enabled:true,
+        maxAge:7*24*60*60, // 7 days
+      strategy: "jwt",
+      }
     },
+    plugins:[jwt()]
   },
 });
