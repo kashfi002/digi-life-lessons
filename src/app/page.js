@@ -1,12 +1,13 @@
 import HeroSlider from "@/components/Heroslider";
 import WhyItMatters from "@/components/Whyitmatters";
-import Image from "next/image";
+import FeaturedPosts from "@/components/FeaturedPosts";
 
 export default function Home() {
   return (
    <>
    <HeroSlider></HeroSlider>
    <WhyItMatters></WhyItMatters>
+   <FeaturedPosts></FeaturedPosts>
    </>
   );
 }
