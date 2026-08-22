@@ -46,7 +46,7 @@ export default function FeaturedPosts() {
     return () => {
       cancelled = true;
     };
-  }, [API]);
+  }, []);
 
   // Nothing featured yet → don't show a half-empty section on the homepage.
   if (!loading && lessons.length === 0) return null;
