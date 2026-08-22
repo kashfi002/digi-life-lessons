@@ -1,29 +1,16 @@
 "use client";
 
-/**
- * My Favorites — /dashboard/my-favorites
- * -----------------------------------------------------------------------
- * Fetches the joined favorites+lesson data from the backend once, then
- * filters by category/tone entirely client-side — this list belongs to
- * one user and is realistically small, so there's no need for the
- * server-side pagination/filtering machinery Public Lessons uses.
- *
- * "Remove from favorites" reuses the same POST /:id/favorite toggle
- * endpoint from the Lesson Details page — since every lesson here is
- * already favorited, calling it always removes rather than adds.
- */
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api-fetch";
 
 const CATEGORIES = ["Personal Growth", "Career", "Relationships", "Mindset", "Mistakes Learned"];
 const TONES = ["Motivational", "Sad", "Realization", "Gratitude"];
 
 export default function MyFavoritesPage() {
   const { data: session, isPending: sessionPending } = useSession();
-  const API = process.env.NEXT_PUBLIC_API_URL;
-
+  
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,7 +27,7 @@ export default function MyFavoritesPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${API}/api/favorites/mine?userId=${session.user.id}`);
+       const res = await apiFetch(`/favorites/mine?userId=${session.user.id}`);
         if (!res.ok) throw new Error("Couldn't load your favorites.");
         const data = await res.json();
         if (!cancelled) setFavorites(data.favorites || []);
@@ -67,11 +54,10 @@ export default function MyFavoritesPage() {
   const handleRemove = async (lesson) => {
     setRemovingId(lesson._id);
     try {
-      const res = await fetch(`${API}/lessons/${lesson._id}/favorite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: session.user.id }),
-      });
+      const res = await apiFetch(`/lessons/${lesson._id}/favorite`, {
+  method: "POST",
+  body: JSON.stringify({ userId: session.user.id }),
+});
       if (!res.ok) throw new Error();
       setFavorites((prev) => prev.filter((l) => l._id !== lesson._id));
       pushToast("success", "Removed from favorites.");

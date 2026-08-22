@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
 import { FacebookShareButton, LinkedinShareButton, TwitterShareButton } from "react-share";
+import { apiFetch } from "@/lib/api-fetch";
 
 const REPORT_REASONS = [
   "Inappropriate content",
@@ -14,8 +15,6 @@ const REPORT_REASONS = [
 ];
 
 export default function LessonDetailsPage({ params }) {
-  // Next.js 15+ passes `params` as a Promise even in Client Component
-  // pages (they can't be async functions), so React's use() unwraps it.
   const { id } = use(params);
   const { data: session, isPending: sessionPending } = useSession();
   const currentUser = session?.user;
@@ -39,10 +38,6 @@ export default function LessonDetailsPage({ params }) {
 
   const { toasts, pushToast } = useToasts();
 
-  const API = process.env.NEXT_PUBLIC_API_URL;
-
-  // Wait for the session to settle before fetching, so the ?userId=
-  // query actually reflects whether someone's logged in.
   useEffect(() => {
     if (sessionPending) return;
     let cancelled = false;
@@ -53,8 +48,8 @@ export default function LessonDetailsPage({ params }) {
       try {
         const userIdParam = currentUser?.id ? `?userId=${currentUser.id}` : "";
         const [lessonRes, commentsRes] = await Promise.all([
-          fetch(`${API}/lessons/${id}${userIdParam}`),
-          fetch(`${API}/lessons/${id}/comments`),
+          apiFetch(`/lessons/${id}${userIdParam}`),
+          apiFetch(`/lessons/${id}/comments`),
         ]);
 
         if (!lessonRes.ok) {
@@ -113,9 +108,8 @@ export default function LessonDetailsPage({ params }) {
     setLiked(!wasLiked);
     setLikesCount((c) => Math.max(c + (wasLiked ? -1 : 1), 0));
     try {
-      const res = await fetch(`${API}/lessons/${id}/like`, {
+      const res = await apiFetch(`/lessons/${id}/like`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.id }),
       });
       if (!res.ok) throw new Error();
@@ -138,9 +132,8 @@ export default function LessonDetailsPage({ params }) {
     setSaved(!wasSaved);
     setFavoritesCount((c) => Math.max(c + (wasSaved ? -1 : 1), 0));
     try {
-      const res = await fetch(`${API}/lessons/${id}/favorite`, {
+      const res = await apiFetch(`/lessons/${id}/favorite`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.id }),
       });
       if (!res.ok) throw new Error();
@@ -160,9 +153,8 @@ export default function LessonDetailsPage({ params }) {
     }
     setSubmittingReport(true);
     try {
-      const res = await fetch(`${API}/lessons/${id}/report`, {
+      const res = await apiFetch(`/lessons/${id}/report`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reporterUserId: currentUser.id,
           reportedUserEmail: lesson.creatorEmail,
@@ -184,9 +176,8 @@ export default function LessonDetailsPage({ params }) {
     if (!currentUser || !commentText.trim()) return;
     setSubmittingComment(true);
     try {
-      const res = await fetch(`${API}/lessons/${id}/comments`, {
+      const res = await apiFetch(`/lessons/${id}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: currentUser.id,
           userName: currentUser.name,

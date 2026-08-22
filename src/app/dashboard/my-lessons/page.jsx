@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
-
+import { apiFetch } from "@/lib/api-fetch";
 export default function MyLessonsPage() {
   const { data: session, isPending: sessionPending } = useSession();
   const isPremium = Boolean(session?.user?.isPremium);
-  const API = process.env.NEXT_PUBLIC_API_URL;
+ 
 
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function MyLessonsPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${API}/lessons/mine?userId=${session.user.id}`);
+        const res = await apiFetch(`/lessons/mine?userId=${session.user.id}`);
         if (!res.ok) throw new Error("Couldn't load your lessons.");
         const data = await res.json();
         if (!cancelled) setLessons(data.lessons || []);
@@ -49,11 +49,11 @@ export default function MyLessonsPage() {
     const prevValue = lesson.visibility;
     updateLessonLocal(lesson._id, { visibility });
     try {
-      const res = await fetch(`${API}/lessons/${lesson._id}/visibility`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: session.user.id, visibility }),
-      });
+      const res = await apiFetch(`/lessons/${lesson._id}/visibility`, {
+  method: "PATCH",
+  body: JSON.stringify({ userId: session.user.id, visibility }),
+});
+
       if (!res.ok) throw new Error();
       pushToast("success", `Lesson set to ${visibility}.`);
     } catch {
@@ -67,11 +67,10 @@ export default function MyLessonsPage() {
     const prevValue = lesson.accessLevel;
     updateLessonLocal(lesson._id, { accessLevel });
     try {
-      const res = await fetch(`${API}/lessons/${lesson._id}/access-level`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: session.user.id, isPremium, accessLevel }),
-      });
+      const res = await apiFetch(`/lessons/${lesson._id}/access-level`, {
+  method: "PATCH",
+  body: JSON.stringify({ userId: session.user.id, isPremium, accessLevel }),
+});
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error);
@@ -87,11 +86,10 @@ export default function MyLessonsPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API}/lessons/${deleteTarget._id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: session.user.id }),
-      });
+      const res = await apiFetch(`/lessons/${deleteTarget._id}`, {
+  method: "DELETE",
+  body: JSON.stringify({ userId: session.user.id }),
+});
       if (!res.ok) throw new Error();
       setLessons((prev) => prev.filter((l) => l._id !== deleteTarget._id));
       pushToast("success", "Lesson deleted.");

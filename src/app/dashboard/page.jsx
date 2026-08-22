@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { apiFetch } from "@/lib/api-fetch";
 
 export default function DashboardHomePage() {
   const { data: session, isPending } = useSession();
@@ -18,7 +19,7 @@ export default function DashboardHomePage() {
     (async () => {
       setLoadingSummary(true);
       try {
-        const res = await fetch("/api/dashboard/summary");
+        const res = await apiFetch("/dashboard/summary");
         if (!res.ok) throw new Error("Failed to load dashboard data");
         const data = await res.json();
         if (!cancelled) setSummary(data);
@@ -272,7 +273,6 @@ function PageSkeleton() {
   );
 }
 
-/* ---- Tiny inline glyphs, currentColor ---- */
 
 function StackGlyph() {
   return (

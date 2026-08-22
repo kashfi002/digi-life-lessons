@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import LessonCard from "@/components/LessonCard";
-
+import { apiFetch } from "@/lib/api-fetch";
 const CATEGORIES = ["Personal Growth", "Career", "Relationships", "Mindset", "Mistakes Learned"];
 const TONES = ["Motivational", "Sad", "Realization", "Gratitude"];
 const PAGE_SIZE = 6;
@@ -54,7 +54,7 @@ export default function PublicLessonsPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lessons?${queryString}`);
+        const res = await apiFetch(`/lessons?${queryString}`);
         if (!res.ok) throw new Error("Couldn't load lessons right now.");
         const data = await res.json();
         if (!cancelled) {

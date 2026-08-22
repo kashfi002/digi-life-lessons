@@ -52,16 +52,17 @@ export default function AddLessonPage() {
 
         },
         body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          category,
-          emotionalTone: tone,
-          image: image.trim() || null,
-          visibility,
-          accessLevel: isPremium ? accessLevel : "Free",
-          creatorName: session.user.name,
-    
-        }),
+  title: title.trim(),
+  description: description.trim(),
+  category,
+  emotionalTone: tone,
+  image: image.trim() || null,
+  visibility,
+  accessLevel: isPremium ? accessLevel : "Free",
+  creatorId: session.user.id,
+  creatorName: session.user.name,
+  creatorEmail: session.user.email,
+}),
       });
 
       if (!res.ok) {
