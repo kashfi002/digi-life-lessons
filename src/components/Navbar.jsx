@@ -136,9 +136,14 @@ function AccountMenu({ user, onSignOut }) {
         className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-white/[0.05]"
       >
         <Avatar user={user} />
-        <span className="hidden max-w-[100px] truncate text-[14px] font-medium text-[#ECEAE3] lg:inline">
-          {user.name || user.email}
-        </span>
+<span className="hidden max-w-[100px] items-center gap-1.5 truncate text-[14px] font-medium text-[#ECEAE3] lg:inline-flex">
+  {user.name || user.email}
+  {user.role === "admin" && (
+    <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-[#F2C14E]">
+      ADMIN
+    </span>
+  )}
+</span>
         <svg
           width="12"
           height="12"
@@ -160,11 +165,16 @@ function AccountMenu({ user, onSignOut }) {
               <p className="truncate text-[13.5px] font-medium text-[#ECEAE3]">
                 {user.name || "Your account"}
               </p>
-              {user.isPremium && (
-                <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
-                  PREMIUM ⭐
-                </span>
-              )}
+{user.role === "admin" && (
+  <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+    ADMIN
+  </span>
+)}
+{user.isPremium && (
+  <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+    PREMIUM ⭐
+  </span>
+)}
             </div>
             <p className="truncate text-[12.5px] text-[#9BA0AF]">{user.email}</p>
           </div>
@@ -233,9 +243,10 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isLoggedIn = Boolean(session?.user);
-  const isPremium = Boolean(session?.user?.isPremium);
-  const navLinks = buildNavLinks({ isLoggedIn, isPremium });
+const isLoggedIn = Boolean(session?.user);
+const isPremium = Boolean(session?.user?.isPremium);
+const isAdmin = Boolean(session?.user?.role === "admin");
+  const navLinks = buildNavLinks({ isLoggedIn, isPremium, isAdmin });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -378,11 +389,16 @@ export default function Navbar() {
                     <span className="max-w-[140px] truncate text-[14px] text-[#ECEAE3]">
                       {session.user.name || session.user.email}
                     </span>
-                    {session.user.isPremium && (
-                      <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
-                        ⭐
-                      </span>
-                    )}
+{session.user.role === "admin" && (
+  <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+    ADMIN
+  </span>
+)}
+{session.user.isPremium && (
+  <span className="shrink-0 rounded-full bg-[#F2C14E]/15 px-2 py-0.5 text-[10px] font-medium tracking-wide text-[#F2C14E]">
+    ⭐
+  </span>
+)}
                   </div>
                   <Link href="/dashboard/profile" className="rounded-lg px-2 py-2 text-[14px] text-[#9BA0AF]">
                     Profile

@@ -47,6 +47,11 @@ export const auth = betterAuth({
       },
     },
     session: {
+      cookieCache:{
+        enabled:true,
+        maxAge: 7*60*60,
+        strategy: 'jwt'
+      },
       create: {
         before: async (session) => {
           if (!ObjectId.isValid(session.userId)) return;
@@ -62,15 +67,5 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [
-    jwt({
-      jwt: {
-        definePayload: ({ user }) => ({
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        }),
-      },
-    }),
-  ],
+  plugins: [jwt()],
 });
