@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useSession } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api-fetch";
 import LessonCard from "@/components/LessonCard";
 
 const container = {
@@ -20,7 +21,7 @@ const item = {
 export default function FeaturedPosts() {
   const { data: session } = useSession();
   const viewerIsPremium = Boolean(session?.user?.isPremium);
-  const API = process.env.NEXT_PUBLIC_API_URL;
+
 
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function FeaturedPosts() {
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API}/lessons?featured=true&sort=newest&limit=6`);
+        const res = await apiFetch(`/lessons?featured=true&sort=newest&limit=6`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!cancelled) setLessons(data.lessons || []);
