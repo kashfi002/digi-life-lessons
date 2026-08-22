@@ -31,7 +31,7 @@ export default function FeaturedPosts() {
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API}/api/lessons?featured=true&sort=newest&limit=6`);
+        const res = await fetch(`${API}/lessons?featured=true&sort=newest&limit=6`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!cancelled) setLessons(data.lessons || []);

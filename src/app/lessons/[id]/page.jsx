@@ -1,23 +1,5 @@
 "use client";
 
-/**
- * Lesson Details — /lessons/[id]
- * -----------------------------------------------------------------------
- * Fetches from the backend's GET /api/lessons/:id (which also returns
- * authorLessonCount, a deterministic "views" number, and whether *this*
- * viewer already liked/saved it). Comments are fetched separately.
- *
- * Premium gate: if the lesson is Premium and the viewer isn't (and
- * isn't the creator), the whole content area blurs with a lock overlay
- * and a button to /pricing — same pattern as LessonCard, just full-page.
- *
- * Like/Favorite are optimistic: the UI updates immediately, then
- * reconciles with the server response, and rolls back on failure.
- *
- * Install: npm install react-share
- * (used only for the Share button; everything else has no new deps)
- */
-
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
@@ -71,8 +53,8 @@ export default function LessonDetailsPage({ params }) {
       try {
         const userIdParam = currentUser?.id ? `?userId=${currentUser.id}` : "";
         const [lessonRes, commentsRes] = await Promise.all([
-          fetch(`${API}/api/lessons/${id}${userIdParam}`),
-          fetch(`${API}/api/lessons/${id}/comments`),
+          fetch(`${API}/lessons/${id}${userIdParam}`),
+          fetch(`${API}/lessons/${id}/comments`),
         ]);
 
         if (!lessonRes.ok) {
@@ -131,7 +113,7 @@ export default function LessonDetailsPage({ params }) {
     setLiked(!wasLiked);
     setLikesCount((c) => Math.max(c + (wasLiked ? -1 : 1), 0));
     try {
-      const res = await fetch(`${API}/api/lessons/${id}/like`, {
+      const res = await fetch(`${API}/lessons/${id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.id }),
@@ -156,7 +138,7 @@ export default function LessonDetailsPage({ params }) {
     setSaved(!wasSaved);
     setFavoritesCount((c) => Math.max(c + (wasSaved ? -1 : 1), 0));
     try {
-      const res = await fetch(`${API}/api/lessons/${id}/favorite`, {
+      const res = await fetch(`${API}/lessons/${id}/favorite`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.id }),
@@ -178,7 +160,7 @@ export default function LessonDetailsPage({ params }) {
     }
     setSubmittingReport(true);
     try {
-      const res = await fetch(`${API}/api/lessons/${id}/report`, {
+      const res = await fetch(`${API}/lessons/${id}/report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -202,7 +184,7 @@ export default function LessonDetailsPage({ params }) {
     if (!currentUser || !commentText.trim()) return;
     setSubmittingComment(true);
     try {
-      const res = await fetch(`${API}/api/lessons/${id}/comments`, {
+      const res = await fetch(`${API}/lessons/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

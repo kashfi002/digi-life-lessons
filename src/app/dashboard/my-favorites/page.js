@@ -67,7 +67,7 @@ export default function MyFavoritesPage() {
   const handleRemove = async (lesson) => {
     setRemovingId(lesson._id);
     try {
-      const res = await fetch(`${API}/api/lessons/${lesson._id}/favorite`, {
+      const res = await fetch(`${API}/lessons/${lesson._id}/favorite`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: session.user.id }),

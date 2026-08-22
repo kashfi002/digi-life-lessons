@@ -2,31 +2,6 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
-
-/**
- * POST /api/checkout_sessions
- * -----------------------------------------------------------------------
- * Fixes from the original quickstart snippet:
- *   - mode "subscription" → "payment" (the PDF wants a one-time ৳1,500
- *     lifetime payment, not a recurring subscription)
- *   - Added a session check — only logged-in users can start checkout,
- *     and someone already Premium is rejected rather than allowed to
- *     pay twice
- *   - Removed the placeholder Price ID + the invalid
- *     "integration_identifier" field (not a real Stripe param) in favor
- *     of an inline price_data object, so nothing needs to be
- *     pre-created in the Stripe Dashboard
- *   - Returns JSON { url } instead of a 303 redirect — your Pricing
- *     page calls this with fetch() and does
- *     `window.location.href = url` itself, so a server-side redirect
- *     response was never going to be followed by the browser correctly
- *
- * Currency note: BDT isn't a supported presentment currency for every
- * Stripe account (depends on your account's country). If checkout
- * creation fails with a currency error, set STRIPE_CURRENCY=usd in
- * .env and adjust PREMIUM_PRICE_AMOUNT to a USD test amount — no code
- * change needed either way.
- */
 export async function POST() {
   try {
     const session = await auth.api.getSession({ headers: await headers() });

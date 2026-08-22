@@ -1,20 +1,5 @@
 "use client";
 
-/**
- * Public Lessons — /public-lessons
- * -----------------------------------------------------------------------
- * Challenge 1 (search + filter + sort) and Challenge 3 (pagination),
- * both handled server-side by the backend's GET /api/lessons — this
- * page just builds the query string and re-fetches whenever a control
- * changes. Nothing is filtered client-side, so this scales past a
- * handful of test lessons.
- *
- * Filters reset the page back to 1 automatically (changing category
- * while on page 3 with no results would be a confusing dead end
- * otherwise). Search is debounced 400ms so it doesn't fire a request
- * on every keystroke.
- */
-
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import LessonCard from "@/components/LessonCard";
@@ -69,7 +54,7 @@ export default function PublicLessonsPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lessons?${queryString}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lessons?${queryString}`);
         if (!res.ok) throw new Error("Couldn't load lessons right now.");
         const data = await res.json();
         if (!cancelled) {

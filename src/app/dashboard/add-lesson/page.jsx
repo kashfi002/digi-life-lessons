@@ -45,7 +45,7 @@ export default function AddLessonPage() {
     // AFTER
     setSubmitting(true);
     try {
-      const res = await apiFetch("/api/lessons", {
+      const res = await apiFetch("/lessons", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

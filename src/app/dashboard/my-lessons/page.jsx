@@ -1,23 +1,5 @@
 "use client";
 
-/**
- * My Lessons — /dashboard/my-lessons
- * -----------------------------------------------------------------------
- * Table of everything the logged-in user has created (Public AND
- * Private — this is the one place besides Dashboard Home where a
- * user's Private lessons are visible at all).
- *
- * Visibility and Access Level are both editable inline via segmented
- * toggles — no separate "edit mode," just click and it saves
- * immediately (optimistic, rolls back on failure). Access Level's
- * Premium option is disabled with a tooltip for non-Premium users,
- * same rule as Add Lesson.
- *
- * Delete requires a confirmation modal, per the PDF ("remove
- * permanently with confirmation popup") — no bare delete button that
- * fires on a single click.
- */
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
@@ -42,7 +24,7 @@ export default function MyLessonsPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${API}/api/lessons/mine?userId=${session.user.id}`);
+        const res = await fetch(`${API}/lessons/mine?userId=${session.user.id}`);
         if (!res.ok) throw new Error("Couldn't load your lessons.");
         const data = await res.json();
         if (!cancelled) setLessons(data.lessons || []);
@@ -67,7 +49,7 @@ export default function MyLessonsPage() {
     const prevValue = lesson.visibility;
     updateLessonLocal(lesson._id, { visibility });
     try {
-      const res = await fetch(`${API}/api/lessons/${lesson._id}/visibility`, {
+      const res = await fetch(`${API}/lessons/${lesson._id}/visibility`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: session.user.id, visibility }),
@@ -85,7 +67,7 @@ export default function MyLessonsPage() {
     const prevValue = lesson.accessLevel;
     updateLessonLocal(lesson._id, { accessLevel });
     try {
-      const res = await fetch(`${API}/api/lessons/${lesson._id}/access-level`, {
+      const res = await fetch(`${API}/lessons/${lesson._id}/access-level`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: session.user.id, isPremium, accessLevel }),
@@ -105,7 +87,7 @@ export default function MyLessonsPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API}/api/lessons/${deleteTarget._id}`, {
+      const res = await fetch(`${API}/lessons/${deleteTarget._id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: session.user.id }),
